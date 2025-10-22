@@ -37,7 +37,7 @@ class UserRepositoryImpl implements UserRepository{
 
   @override
   Future<bool> isUserSaved(String id) async {
-    final user = await databaseHelper.getUser();
+    final user = await databaseHelper.getUser(id);
     return user != null;
   }
 }

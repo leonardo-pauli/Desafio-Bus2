@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:desafio_bus2/data/models/user_model.dart';
 import 'package:http/http.dart' as http;
@@ -8,7 +9,9 @@ class ApiService {
 
   Future<UserModel> fetchUser() async {
     try{
-      final response = await http.get(Uri.parse(_baseUrl));
+      final response = await http
+          .get(Uri.parse(_baseUrl))
+          .timeout(const Duration(seconds: 10));
 
       if(response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
@@ -23,7 +26,9 @@ class ApiService {
       } else {
         throw Exception('Falha ao carregar usuário: ${response.statusCode}');
       }
-    }catch(e){
+    } on TimeoutException {
+      throw Exception('Tempo de conexão esgotado. Verifique sua internet e tente novamente.');
+    } catch(e){
       throw Exception('Erro de rede ou parsing: $e');
     }
   }
