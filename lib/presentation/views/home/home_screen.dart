@@ -2,6 +2,7 @@ import 'package:desafio_bus2/data/models/user_model.dart';
 import 'package:desafio_bus2/data/repositories/user_repository.dart';
 import 'package:desafio_bus2/presentation/viewmodels/home/home_cubit.dart';
 import 'package:desafio_bus2/presentation/viewmodels/home/home_state.dart';
+import 'package:desafio_bus2/presentation/views/details/details_screen.dart';
 import 'package:desafio_bus2/presentation/views/saved_users/saved_users_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -69,15 +70,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
   }
+
   Widget _buildUserTile(BuildContext context, UserModel user) {
     return ListTile(
-      leading: CircleAvatar(
-        backgroundImage: NetworkImage(user.picture.medium),
-      ),
+      leading: CircleAvatar(backgroundImage: NetworkImage(user.picture.medium)),
       title: Text('${user.name.first} ${user.name.last}'),
       subtitle: Text(user.email),
-      onTap: (){
-        print('Clicou em ${user.email}');
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            // 2. O builder constrói a tela de destino
+            builder: (_) => DetailsScreen(
+              // 3. Passa o objeto 'user' para o construtor da DetailsScreen
+              user: user,
+            ),
+          ),
+        );
       },
     );
   }

@@ -19,6 +19,14 @@ class DatabaseHelper {
   final String _colPhone = 'phone';
   final String _colPictureLarge = 'pictureLarge';
   final String _colPictureMedium = 'pictureMedium';
+  final String _colStreet = 'street';
+  final String _colCity = 'city';
+  final String _colState = 'state';
+  final String _colCountry = 'country';
+  final String _colPostcode = 'postcode';
+  final String _colDobDate = 'dobDate';
+  final String _colDobAge = 'dobAge';
+  final String _colUsername = 'username';
 
 Future<Database> get database async {
     if (_database != null) return _database!;
@@ -47,7 +55,15 @@ Future<Database> get database async {
         $_colEmail TEXT,
         $_colPhone TEXT,
         $_colPictureLarge TEXT,
-        $_colPictureMedium TEXT
+        $_colPictureMedium TEXT,
+        $_colStreet TEXT,
+        $_colCity TEXT,
+        $_colState TEXT,
+        $_colCountry TEXT,
+        $_colPostcode TEXT,
+        $_colDobDate TEXT,
+        $_colDobAge INTEGER,
+        $_colUsername TEXT
     )
     ''');
   }
