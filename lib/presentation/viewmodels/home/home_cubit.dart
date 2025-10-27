@@ -37,8 +37,6 @@ class HomeCubit extends Cubit<HomeState>{
     try{
       final newUser = await _userRepository.getRemoteUser();
 
-      _userRepository.saveUser(newUser);
-
       _userList.add(newUser);
 
       emit(HomeLoaded(List.from(_userList)));

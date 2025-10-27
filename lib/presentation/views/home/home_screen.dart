@@ -79,9 +79,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            // 2. O builder constrói a tela de destino
             builder: (_) => DetailsScreen(
-              // 3. Passa o objeto 'user' para o construtor da DetailsScreen
               user: user,
             ),
           ),
