@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'user_model.dart' show UserModel, Name, Picture, Location, Street, Dob, Login;
 
 class UserDbModel extends Equatable {
   final String id;
@@ -77,6 +78,46 @@ class UserDbModel extends Equatable {
       'dobAge': dobAge,
       'username': username,
     };
+  }
+
+  UserModel toUserModel(){
+    final streetParts = street.split(' ');
+    final streetNumber = int.tryParse(streetParts.first) ?? 0;
+
+    final streetName = streetParts.length > 1
+    ? streetParts.skip(1).join(' ')
+    : street;
+
+    return UserModel(
+      email: email, 
+      name: Name(
+        first: firstName, 
+        last: lastName, 
+        title: title,
+        ), 
+      phone: phone, 
+      picture: Picture(
+        large: pictureLarge, 
+        medium: pictureMedium,
+        ), 
+      location: Location(
+        city: city, 
+        country: country, 
+        postcode: postcode, 
+        state: state, 
+        street: Street(
+          name: streetName, 
+          number: streetNumber,
+          ),
+          ), 
+      dob: Dob(
+        date: dobDate, 
+        age: dobAge,
+        ), 
+      login: Login(
+        username: username,
+        )
+      );
   }
 
   @override
