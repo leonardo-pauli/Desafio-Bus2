@@ -4,12 +4,16 @@ class EmptyStateDisplay extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
+  final VoidCallback? onRetry;
+  final String retryButtonText;
 
   const EmptyStateDisplay({
     super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
+    required this.onRetry,
+    this.retryButtonText = 'Tentar Novamente'
   });
 
   @override
@@ -43,6 +47,18 @@ class EmptyStateDisplay extends StatelessWidget {
                 color: Colors.grey.shade600,
               ),
             ),
+
+            if(onRetry != null) ...[
+              const SizedBox(height: 24,),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12)
+                ),
+                onPressed: onRetry, 
+                child: Text(retryButtonText),)
+            ]
           ],
         ),
       ),

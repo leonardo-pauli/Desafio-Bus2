@@ -58,10 +58,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 return const Center(child: CircularProgressIndicator());
               }
               if (state is HomeError) {
-                return const EmptyStateDisplay(
-                  icon: Icons.wifi_off_rounded, 
-                  title: 'Ops! Falha na conexão.', 
-                  subtitle: 'Não foi possivel buscar novos usuários. Verifique sua internet e tente novamente.');
+                return Stack(
+                  children: [ 
+                    ListView(),
+                    EmptyStateDisplay(
+                    icon: Icons.wifi_off_rounded, 
+                    title: 'Ops! Falha na conexão.', 
+                    subtitle: 'Não foi possivel buscar novos usuários. Verifique sua internet e tente novamente.', 
+                    onRetry: () => _homeCubit.refresh(this)),
+                    
+                ]);
               }
               if (state is HomeLoaded) {
                 final users = state.users;

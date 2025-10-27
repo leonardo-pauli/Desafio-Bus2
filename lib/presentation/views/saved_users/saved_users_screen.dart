@@ -13,129 +13,133 @@ class SavedUsersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context){
+      create: (context) {
         final repository = context.read<UserRepository>();
         return SavedUsersCubit(repository)..loadSavedUsers();
       },
       child: Builder(
         builder: (context) {
           return Scaffold(
-            appBar: AppBar(
-              title: Text('Usuarios Salvos'),
-            ),
+            appBar: AppBar(title: Text('Usuarios Salvos')),
             body: RefreshIndicator(
               onRefresh: () => context.read<SavedUsersCubit>().loadSavedUsers(),
               child: BlocBuilder<SavedUsersCubit, SavedUsersState>(
-                builder: (context, state){
-                  if(state is SavedUsersLoading){
-                    return Center(child: CircularProgressIndicator(),);
+                builder: (context, state) {
+                  if (state is SavedUsersLoading) {
+                    return Center(child: CircularProgressIndicator());
                   }
-              
-                  if(state is SavedUsersError){
+
+                  if (state is SavedUsersError) {
                     return Stack(
                       children: [
                         ListView(),
-                        const EmptyStateDisplay(
+                        EmptyStateDisplay(
                           icon: Icons.error_outline_rounded,
                           title: 'Erro no Banco de Dados',
-                          subtitle: 'Não foi possível carregar seus usuários. Puxe para baixo para tentar novamente.',
+                          subtitle:
+                              'Não foi possível carregar seus usuários. Puxe para baixo para tentar novamente.',
+                          onRetry: () =>
+                              context.read<SavedUsersCubit>().loadSavedUsers(),
+                          retryButtonText: 'Recarregar',
                         ),
                       ],
                     );
                   }
-              
-                  if(state is SavedUsersEmpty){
+
+                  if (state is SavedUsersEmpty) {
                     return Stack(
                       children: [
                         ListView(),
-                        const EmptyStateDisplay(
+                        EmptyStateDisplay(
                           icon: Icons.person_search_rounded,
                           title: 'Nenhum Usuário Salvo',
-                          subtitle: 'Puxe para baixo para atualizar a lista.',
+                          subtitle: 'Volte para tela inicial e salve alguns usuários!',
+                          onRetry: () {
+                            Navigator.of(context).pop();
+                          },
+                          retryButtonText: 'Salvar Usuários',
                         ),
                       ],
                     );
                   }
-              
-                  if(state is SavedUsersLoaded){
+
+                  if (state is SavedUsersLoaded) {
                     return ListView.builder(
                       itemCount: state.users.length,
-                      itemBuilder: (context, index){
+                      itemBuilder: (context, index) {
                         final user = state.users[index];
                         return _buildUserTile(context, user);
-                      }
-                      );
-                      
+                      },
+                    );
                   }
                   return Container();
                 },
               ),
             ),
           );
-        }
-      ),
-      );
-  }
-}
-
-  Widget _buildUserTile(BuildContext context, UserDbModel user) {
-    return Dismissible(
-      key: Key(user.id),
-      direction: DismissDirection.endToStart,
-      
-      onDismissed: (direction) {
-        context.read<SavedUsersCubit>().deleteUser(user.id);
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${user.firstName} removido(a).'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      },
-      
-      // O "fundo" vermelho. Vamos deixá-lo com bordas arredondadas.
-      background: Container(
-        color: Colors.red,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      
-      // O Card é o filho do Dismissible
-      child: Card(
-        elevation: 2.0,
-        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          leading: CircleAvatar(
-            radius: 28,
-            backgroundImage: NetworkImage(user.pictureMedium),
-          ),
-          title: Text(
-            '${user.firstName} ${user.lastName}',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          subtitle: Text(user.email),
-          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-          onTap: () async {
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => DetailsScreen(
-                  user: user.toUserModel(),
-                ),
-              ),
-            );
-
-            if (context.mounted) {
-              context.read<SavedUsersCubit>().loadSavedUsers();
-            }
-          },
-        ),
+        },
       ),
     );
   }
+}
+
+Widget _buildUserTile(BuildContext context, UserDbModel user) {
+  return Dismissible(
+    key: Key(user.id),
+    direction: DismissDirection.endToStart,
+
+    onDismissed: (direction) {
+      context.read<SavedUsersCubit>().deleteUser(user.id);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${user.firstName} removido(a).'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    },
+
+    // O "fundo" vermelho. Vamos deixá-lo com bordas arredondadas.
+    background: Container(
+      color: Colors.red,
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+      child: const Icon(Icons.delete, color: Colors.white),
+    ),
+
+    // O Card é o filho do Dismissible
+    child: Card(
+      elevation: 2.0,
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16.0,
+          vertical: 8.0,
+        ),
+        leading: CircleAvatar(
+          radius: 28,
+          backgroundImage: NetworkImage(user.pictureMedium),
+        ),
+        title: Text(
+          '${user.firstName} ${user.lastName}',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(user.email),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () async {
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => DetailsScreen(user: user.toUserModel()),
+            ),
+          );
+
+          if (context.mounted) {
+            context.read<SavedUsersCubit>().loadSavedUsers();
+          }
+        },
+      ),
+    ),
+  );
+}
