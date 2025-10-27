@@ -17,44 +17,62 @@ class SavedUsersScreen extends StatelessWidget {
         final repository = context.read<UserRepository>();
         return SavedUsersCubit(repository)..loadSavedUsers();
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('Usuarios Salvos'),
-        ),
-        body: BlocBuilder<SavedUsersCubit, SavedUsersState>(
-          builder: (context, state){
-            if(state is SavedUsersLoading){
-              return Center(child: CircularProgressIndicator(),);
-            }
-
-            if(state is SavedUsersError){
-              return const EmptyStateDisplay(
-                icon: Icons.error_outline_rounded, 
-                title: 'Erro no Banco de Dados', 
-                subtitle: 'Não foi possível carregar seus usuários.');
-            }
-
-            if(state is SavedUsersEmpty){
-              return const EmptyStateDisplay(
-                icon: Icons.person_search_rounded, 
-                title: 'Nenhum Usuário Salvo', 
-                subtitle: 'Vá para a tela inicial, encontre usuários e salve-os para que apareçam aqui.',
-                );
-            }
-
-            if(state is SavedUsersLoaded){
-              return ListView.builder(
-                itemCount: state.users.length,
-                itemBuilder: (context, index){
-                  final user = state.users[index];
-                  return _buildUserTile(context, user);
-                }
-                );
-                
-            }
-            return Container();
-          },
-        ),
+      child: Builder(
+        builder: (context) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Usuarios Salvos'),
+            ),
+            body: RefreshIndicator(
+              onRefresh: () => context.read<SavedUsersCubit>().loadSavedUsers(),
+              child: BlocBuilder<SavedUsersCubit, SavedUsersState>(
+                builder: (context, state){
+                  if(state is SavedUsersLoading){
+                    return Center(child: CircularProgressIndicator(),);
+                  }
+              
+                  if(state is SavedUsersError){
+                    return Stack(
+                      children: [
+                        ListView(),
+                        const EmptyStateDisplay(
+                          icon: Icons.error_outline_rounded,
+                          title: 'Erro no Banco de Dados',
+                          subtitle: 'Não foi possível carregar seus usuários. Puxe para baixo para tentar novamente.',
+                        ),
+                      ],
+                    );
+                  }
+              
+                  if(state is SavedUsersEmpty){
+                    return Stack(
+                      children: [
+                        ListView(),
+                        const EmptyStateDisplay(
+                          icon: Icons.person_search_rounded,
+                          title: 'Nenhum Usuário Salvo',
+                          subtitle: 'Puxe para baixo para atualizar a lista.',
+                        ),
+                      ],
+                    );
+                  }
+              
+                  if(state is SavedUsersLoaded){
+                    return ListView.builder(
+                      itemCount: state.users.length,
+                      itemBuilder: (context, index){
+                        final user = state.users[index];
+                        return _buildUserTile(context, user);
+                      }
+                      );
+                      
+                  }
+                  return Container();
+                },
+              ),
+            ),
+          );
+        }
       ),
       );
   }

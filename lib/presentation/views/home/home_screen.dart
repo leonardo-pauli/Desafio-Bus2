@@ -16,14 +16,26 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+  late final HomeCubit _homeCubit;
+
+  @override
+  void initState(){
+    super.initState();
+    _homeCubit = HomeCubit(
+      context.read<UserRepository>(),
+    )..init(this);
+  }
+
+  @override
+  void dispose(){
+    _homeCubit.close();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) {
-        final userRepository = RepositoryProvider.of<UserRepository>(context);
-
-        return HomeCubit(userRepository)..init(this);
-      },
+    return BlocProvider.value(
+      value: _homeCubit,
       child: Scaffold(
         appBar: AppBar(
           title: Text('Usuarios Aleatorios'),
@@ -38,30 +50,33 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ],
         ),
-        body: BlocBuilder<HomeCubit, HomeState>(
-          builder: (context, state) {
-            if (state is HomeLoading || state is HomeInitial) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (state is HomeError) {
-              return const EmptyStateDisplay(
-                icon: Icons.wifi_off_rounded, 
-                title: 'Ops! Falha na conexão.', 
-                subtitle: 'Não foi possivel buscar novos usuários. Verifique sua internet e tente novamente.');
-            }
-            if (state is HomeLoaded) {
-              final users = state.users;
-
-              return ListView.builder(
-                itemCount: users.length,
-                itemBuilder: (context, index) {
-                  final user = users[users.length - 1 - index];
-                  return _buildUserTile(context, user);
-                },
-              );
-            }
-            return const Center(child: Text('Nenhum usuario encontrado.'));
-          },
+        body: RefreshIndicator(
+          onRefresh: () => _homeCubit.refresh(this),
+          child: BlocBuilder<HomeCubit, HomeState>(
+            builder: (context, state) {
+              if (state is HomeLoading || state is HomeInitial) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (state is HomeError) {
+                return const EmptyStateDisplay(
+                  icon: Icons.wifi_off_rounded, 
+                  title: 'Ops! Falha na conexão.', 
+                  subtitle: 'Não foi possivel buscar novos usuários. Verifique sua internet e tente novamente.');
+              }
+              if (state is HomeLoaded) {
+                final users = state.users;
+          
+                return ListView.builder(
+                  itemCount: users.length,
+                  itemBuilder: (context, index) {
+                    final user = users[users.length - 1 - index];
+                    return _buildUserTile(context, user);
+                  },
+                );
+              }
+              return const Center(child: Text('Nenhum usuario encontrado.'));
+            },
+          ),
         ),
       ),
     );

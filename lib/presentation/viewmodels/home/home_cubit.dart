@@ -22,6 +22,22 @@ class HomeCubit extends Cubit<HomeState>{
     _ticker?.start();
   }
 
+  Future<void> refresh(TickerProvider vsync) async {
+    _ticker?.dispose();
+    _ticker = null;
+
+    _userList.clear();
+
+    _lastFetchTime = Duration.zero;
+
+    emit(HomeLoading());
+
+    _ticker = vsync.createTicker(_onTick);
+    _ticker?.start();
+
+    await _fetchAndAddUser();
+  }
+
   void _onTick(Duration elapsed) {
     if(elapsed - _lastFetchTime >= _fetchInterval){
       _lastFetchTime = elapsed;
