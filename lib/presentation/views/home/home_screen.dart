@@ -1,3 +1,4 @@
+import 'package:desafio_bus2/core/widgets/empty_state_display.dart';
 import 'package:desafio_bus2/data/models/user_model.dart';
 import 'package:desafio_bus2/data/repositories/user_repository.dart';
 import 'package:desafio_bus2/presentation/viewmodels/home/home_cubit.dart';
@@ -43,15 +44,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               return const Center(child: CircularProgressIndicator());
             }
             if (state is HomeError) {
-              return Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text(
-                    'Erro ao carregar usuarios: ${state.message}',
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              );
+              return const EmptyStateDisplay(
+                icon: Icons.wifi_off_rounded, 
+                title: 'Ops! Falha na conexão.', 
+                subtitle: 'Não foi possivel buscar novos usuários. Verifique sua internet e tente novamente.');
             }
             if (state is HomeLoaded) {
               final users = state.users;
@@ -72,19 +68,30 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildUserTile(BuildContext context, UserModel user) {
-    return ListTile(
-      leading: CircleAvatar(backgroundImage: NetworkImage(user.picture.medium)),
-      title: Text('${user.name.first} ${user.name.last}'),
-      subtitle: Text(user.email),
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => DetailsScreen(
-              user: user,
-            ),
-          ),
-        );
-      },
+    return Card(
+      elevation: 2.0, // Sombra suave
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        leading: CircleAvatar(
+          radius: 28,
+          backgroundImage: NetworkImage(user.picture.medium),
+        ),
+        title: Text(
+          '${user.name.first} ${user.name.last}',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(user.email),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => DetailsScreen(user: user),
+          ));
+        },
+      ),
     );
   }
 }
