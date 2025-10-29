@@ -19,113 +19,124 @@ class DetailsScreen extends StatelessWidget {
         final repository = context.read<UserRepository>();
         return DetailsCubit( user, repository)..checkSavedStatus();
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('${user.name.first} ${user.name.last}'),
-        ),
-        
-        floatingActionButton: BlocBuilder<DetailsCubit, DetailsState>(
-          builder: (context, state) {
-            if (state is DetailsLoaded) {
-              return FloatingActionButton(
-                onPressed: () {
-                  context.read<DetailsCubit>().toggleSave();
-                },
-                backgroundColor: state.isSaved
-                    ? Colors.red.shade700
-                    : Theme.of(context).colorScheme.primary,
-                child: Icon(
-                  state.isSaved ? Icons.delete_forever : Icons.save,
-                  color: Colors.white,
-                ),
-              );
-            }
-            return FloatingActionButton(
-              onPressed: null,
-              backgroundColor: Colors.grey.shade400,
-              child: const CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
+      child: BlocListener<DetailsCubit, DetailsState>(
+        listenWhen: (previous, current) => current is DetailsActionFailure,
+        listener: (context, state) {
+          if(state is DetailsActionFailure){
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Erro: Não foi possivel completar a ação.'),
+              backgroundColor: Colors.red,)
             );
-          },
-        ),
-        
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 80.0), 
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildHeader(context, user),
+          }
+        },
+        child:  Scaffold(
+          appBar: AppBar(
+            title: Text('${user.name.first} ${user.name.last}'),
+          ),
+          
+          floatingActionButton: BlocBuilder<DetailsCubit, DetailsState>(
+            builder: (context, state) {
+              if(state is DetailsLoading){
+                return FloatingActionButton(onPressed: null,
+                backgroundColor: Colors.grey,
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),);
+              }
+              final isSaved = (state as DetailsLoaded).isSaved;
 
-              _buildInfoCard(
-                context,
-                title: 'Informações de Login',
-                children: [
-                  _buildInfoTile(
-                    context,
-                    title: 'Username',
-                    subtitle: user.login.username,
-                    icon: Icons.person_outline,
+                return FloatingActionButton(
+                  onPressed: () {
+                    context.read<DetailsCubit>().toggleSave();
+                  },
+                  backgroundColor: state.isSaved
+                      ? Colors.red
+                      : Theme.of(context).colorScheme.primary,
+                  child: Icon(
+                    state.isSaved ? Icons.delete_forever : Icons.save,
+                    color: Colors.white,
                   ),
-                  _buildInfoTile(
-                    context,
-                    title: 'Email',
-                    subtitle: user.email,
-                    icon: Icons.email_outlined,
-                  ),
-                  _buildInfoTile(
-                    context,
-                    title: 'Telefone',
-                    subtitle: user.phone,
-                    icon: Icons.phone_outlined,
-                  ),
-                ],
-              ),
-              
-              _buildInfoCard(
-                context,
-                title: 'Localização',
-                children: [
-                  _buildInfoTile(
-                    context,
-                    title: 'Endereço',
-                    subtitle: '${user.location.street.number} ${user.location.street.name}',
-                    icon: Icons.location_on_outlined,
-                  ),
-                  _buildInfoTile(
-                    context,
-                    title: 'Cidade / Estado',
-                    subtitle: '${user.location.city}, ${user.location.state}',
-                    icon: Icons.map_outlined,
-                  ),
-                  _buildInfoTile(
-                    context,
-                    title: 'País',
-                    subtitle: user.location.country,
-                    icon: Icons.public_outlined,
-                  ),
-                ],
-              ),
-              
-              _buildInfoCard(
-                context,
-                title: 'Informações Pessoais',
-                children: [
-                  _buildInfoTile(
-                    context,
-                    title: 'Data Nasc.',
-                    subtitle: _formatDate(user.dob.date),
-                    icon: Icons.calendar_today_outlined,
-                  ),
-                  _buildInfoTile(
-                    context,
-                    title: 'Idade',
-                    subtitle: '${user.dob.age} anos',
-                    icon: Icons.cake_outlined,
-                  ),
-                ],
-              ),
-            ],
+                );
+              }            
+          ),
+          
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 80.0), 
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildHeader(context, user),
+        
+                _buildInfoCard(
+                  context,
+                  title: 'Informações de Login',
+                  children: [
+                    _buildInfoTile(
+                      context,
+                      title: 'Username',
+                      subtitle: user.login.username,
+                      icon: Icons.person_outline,
+                    ),
+                    _buildInfoTile(
+                      context,
+                      title: 'Email',
+                      subtitle: user.email,
+                      icon: Icons.email_outlined,
+                    ),
+                    _buildInfoTile(
+                      context,
+                      title: 'Telefone',
+                      subtitle: user.phone,
+                      icon: Icons.phone_outlined,
+                    ),
+                  ],
+                ),
+                
+                _buildInfoCard(
+                  context,
+                  title: 'Localização',
+                  children: [
+                    _buildInfoTile(
+                      context,
+                      title: 'Endereço',
+                      subtitle: '${user.location.street.number} ${user.location.street.name}',
+                      icon: Icons.location_on_outlined,
+                    ),
+                    _buildInfoTile(
+                      context,
+                      title: 'Cidade / Estado',
+                      subtitle: '${user.location.city}, ${user.location.state}',
+                      icon: Icons.map_outlined,
+                    ),
+                    _buildInfoTile(
+                      context,
+                      title: 'País',
+                      subtitle: user.location.country,
+                      icon: Icons.public_outlined,
+                    ),
+                  ],
+                ),
+                
+                _buildInfoCard(
+                  context,
+                  title: 'Informações Pessoais',
+                  children: [
+                    _buildInfoTile(
+                      context,
+                      title: 'Data Nasc.',
+                      subtitle: _formatDate(user.dob.date),
+                      icon: Icons.calendar_today_outlined,
+                    ),
+                    _buildInfoTile(
+                      context,
+                      title: 'Idade',
+                      subtitle: '${user.dob.age} anos',
+                      icon: Icons.cake_outlined,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

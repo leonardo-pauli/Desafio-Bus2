@@ -32,7 +32,7 @@ class DetailsCubit extends Cubit<DetailsState>{
 
         emit(DetailsLoaded(isSaved: !currentSavedStatus));
       }catch(e){
-        
+        emit (DetailsActionFailure(message: e.toString(), isSaved: currentSavedStatus));
       }
     }
 
