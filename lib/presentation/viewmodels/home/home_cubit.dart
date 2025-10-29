@@ -26,8 +26,6 @@ class HomeCubit extends Cubit<HomeState>{
     _ticker?.dispose();
     _ticker = null;
 
-    _userList.clear();
-
     _lastFetchTime = Duration.zero;
 
     emit(HomeLoading());

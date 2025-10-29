@@ -41,10 +41,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           title: Text('Usuarios Aleatorios'),
           actions: [
             IconButton(
-              onPressed: () {
-                Navigator.of(context).push(
+              onPressed: () async{
+                await Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const SavedUsersScreen()),
                 );
+                if(context.mounted) {
+                  _homeCubit.refresh(this);
+                }
               },
               icon: Icon(Icons.data_usage),
             ),
